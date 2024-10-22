@@ -21,5 +21,20 @@ router.get(
   auth(),
   AuthController.getLoggedUser
 )
+router.get(
+  '/users',
+  auth(),
+  AuthController.getAllUser
+)
+router.get(
+  '/statistics',
+  AuthController.getStatistics
+)
+router.delete(
+  '/users/:id',
+  auth(),
+  AuthController.deleteUser
+)
+
 
 export const AuthRoute = router

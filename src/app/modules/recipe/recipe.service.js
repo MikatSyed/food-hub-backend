@@ -4,6 +4,7 @@ import ApiError from '../../../errors/ApiError.js';
 import { queryHelpers } from '../../../helpers/paginationHelpers.js';
 import { User } from '../auth/auth.model.js';
 import { recipeSearchableFields } from './recipe.constant.js';
+import { Review } from '../review/review.model.js';
 
 const createRecipe = async (user, userId) => {
 
@@ -39,7 +40,6 @@ const getAllRecipes = async (filters, queryOptions) => {
     });
   }
 
-
   if (Object.keys(filtersData).length) {
     andConditions.push({
       $and: Object.entries(filtersData).map(([field, value]) => ({
@@ -63,17 +63,49 @@ const getAllRecipes = async (filters, queryOptions) => {
     purchased_by: 1,
     creatorEmail: 1,
     country: 1,
-    category:1
+    category: 1,
   };
 
-  const result = await Recipe.find(whereConditions)
+  // Fetch the recipes based on the filters, sorting, and pagination
+  const recipes = await Recipe.find(whereConditions)
     .select(projection)
     .sort(sortConditions);
+
+  // Aggregate the average rating and total reviews for each recipe
+  const reviewsAggregation = await Review.aggregate([
+    {
+      $group: {
+        _id: '$serviceId', // Group by the recipe's ID
+        averageRating: { $avg: '$rating' }, // Calculate the average rating
+        totalReviews: { $sum: 1 }, // Count the total number of reviews
+      },
+    },
+  ]);
+
+  // Convert the aggregation results into an object for easy lookup
+  const reviewsData = reviewsAggregation.reduce((acc, item) => {
+    acc[item._id.toString()] = {
+      averageRating: item.averageRating.toFixed(1),
+      totalReviews: item.totalReviews,
+    };
+    return acc;
+  }, {});
+
+  // Map the aggregated review data to the corresponding recipes
+  const paginatedResult = recipes.map(recipe => {
+    const recipeId = recipe._id.toString();
+    const reviewInfo = reviewsData[recipeId] || { averageRating: 0, totalReviews: 0 };
+    return {
+      ...recipe.toObject(),
+      averageRating: reviewInfo.averageRating,
+      totalReviews: reviewInfo.totalReviews,
+    };
+  });
 
   // Implement pagination
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + limit;
-  const paginatedResult = result.slice(startIndex, endIndex);
+  const paginatedAndRatedResult = paginatedResult.slice(startIndex, endIndex);
 
   const total = await Recipe.countDocuments(whereConditions);
 
@@ -83,7 +115,7 @@ const getAllRecipes = async (filters, queryOptions) => {
       limit,
       total,
     },
-    data: paginatedResult,
+    data: paginatedAndRatedResult,
   };
 };
 
@@ -158,6 +190,34 @@ const purchaseRecipe = async (userId, recipeId) => {
   return { user, recipe };
 };
 
+const reactRecipe = async (userId, recipeId) => {
+  try {
+    // Check if user exists
+    const userInfo = await User.findById(userId);
+    if (!userInfo) {
+      console.log('User not found');
+      return { message: 'User not found', status: 404 };
+    }
+
+    // Fetch the recipe
+    const recipe = await Recipe.findById(recipeId);
+    if (!recipe) {
+      console.log('Recipe not found');
+      return { message: 'Recipe not found', status: 404 };
+    }
+
+    // Toggle the isReact field
+    recipe.isReact = !recipe.isReact;
+    await recipe.save();
+
+    console.log('Recipe updated successfully', recipe);
+    return { message: 'Recipe updated successfully', recipe, status: 200 };
+  } catch (error) {
+    console.error('Error updating recipe:', error);
+    return { message: 'Error updating recipe', error, status: 500 };
+  }
+};
+
 const updateRecipe = async (id, payload) => {
   const isExist = await Recipe.findOne({ _id: id });
 
@@ -171,13 +231,13 @@ const updateRecipe = async (id, payload) => {
 
   const result = await Recipe.findOneAndUpdate({ _id: id }, updatedRecipeData, {
     new: true,
-  }).populate('seller');
+  })
 
   return result;
 };
 
 const deleteRecipe = async (id) => {
-  const result = await Recipe.findByIdAndDelete({ _id: id }).populate('seller');
+  const result = await Recipe.findByIdAndDelete({ _id: id })
   return result;
 };
 
@@ -187,6 +247,7 @@ export const RecipeService = {
   getSingleRecipe,
   getSuggestionedRecipe,
   purchaseRecipe,
+  reactRecipe,
   updateRecipe,
   deleteRecipe,
 };

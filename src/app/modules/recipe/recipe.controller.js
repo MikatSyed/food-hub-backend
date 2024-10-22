@@ -80,6 +80,20 @@ const purchaseRecipe = catchAsync(async (req, res) => {
   })
 })
 
+const reactRecipe = catchAsync(async (req, res) => {
+  const  recipeId  = req.params.recipeId;
+  const userId = req.user.userId;
+
+  const result = await RecipeService.reactRecipe(userId,recipeId)
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Recipe retrieved successfully !',
+    data: result,
+  })
+})
+
 const updateRecipe = catchAsync(async (req, res) => {
   const id = req.params.id
   const updatedData = req.body
@@ -113,6 +127,7 @@ export const RecipeController = {
   getSingleRecipe,
   getSuggestionedRecipe,
   purchaseRecipe,
+  reactRecipe,
   updateRecipe,
   deleteRecipe,
 }

@@ -25,7 +25,7 @@ const initPayment = async (data,userId) => {
     cus_email: user.email,
   
   });
-console.log(paymentSession,'28')
+// console.log(paymentSession,'28')
 
 
     if (!user) {

@@ -2,6 +2,7 @@ import express from 'express'
 import {AuthRoute} from "../modules/auth/auth.route.js"
 import { RecipeRoute } from '../modules/recipe/recipe.route.js'
 import { paymentRoutes } from '../modules/payment/payment.route.js'
+import { ReviewRoute } from '../modules/review/review.route.js'
 
 
 
@@ -20,6 +21,10 @@ const moduleRoutes = [
   {
     path: '/payment',
     route: paymentRoutes,
+  },
+  {
+    path: '/review',
+    route: ReviewRoute,
   },
 
 ]

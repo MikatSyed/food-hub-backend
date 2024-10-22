@@ -64,9 +64,50 @@ const getLoggedUser = catchAsync(async (req, res) => {
   })
 })
 
+const getAllUser = catchAsync(async (req, res) => {
+
+
+
+  const result = await authService.getAllUser()
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User's information retrieved successfully",
+    data: result,
+  })
+})
+
+const getStatistics = catchAsync(async (req, res) => {
+  const result = await authService.getStatistics()
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Statistics information retrieved successfully",
+    data: result,
+  })
+})
+
+
+const deleteUser = catchAsync(async (req, res) => {
+  const id = req.params.id
+
+  const result = await authService.deleteUser(id)
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User deleted successfully !',
+    data: result,
+  })
+})
 export const AuthController = {
 
   socialLogin,
   // refreshToken,
-  getLoggedUser
+  getLoggedUser,
+  getAllUser,
+  getStatistics,
+  deleteUser
 }

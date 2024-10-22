@@ -34,6 +34,10 @@ const recipeSchema = new Schema(
       type: Number,
       default: 0,
     },
+    isReact: {
+      type:Boolean,
+      default:false
+    },
     purchased_by: {
       type: [String],
       default: [],

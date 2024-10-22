@@ -3,20 +3,25 @@ import axios from 'axios';
 import ApiError from '../../../errors/ApiError.js';
 import config from '../../../config/index.js';
 
-
-
 const initPayment = async (payload) => {
   try {
+    const environment = process.env.NODE_ENV || 'development';
+
+    const successUrl =
+      environment === 'production'
+        ? 'https://food-hub-eta.vercel.app/api/v1/payment/success'
+        : 'http://localhost:6660/api/v1/payment/success';
+
     const data = {
       store_id: config.ssl.storeId,
       store_passwd: config.ssl.storePass,
       total_amount: payload.total_amount,
       currency: 'USD',
-      tran_id: payload.tran_id, // use unique tran_id for each api call
-      success_url: `https://localhost:6660/api/v1/payment/success`,
-      fail_url: `http://localhost:3000/fail`,
-      cancel_url: `http://localhost:3000/cancel`,
-      ipn_url: 'http://localhost:3030/ipn',
+      tran_id: payload.tran_id, // Use unique tran_id for each API call
+      success_url: successUrl,
+      fail_url: environment === 'production' ? 'https://food-hub-eta.vercel.app/fail' : 'http://localhost:3000/fail',
+      cancel_url: environment === 'production' ? 'https://food-hub-eta.vercel.app/cancel' : 'http://localhost:3000/cancel',
+      ipn_url: environment === 'production' ? 'https://food-hub-eta.vercel.app/ipn' : 'http://localhost:3030/ipn',
       shipping_method: 'N/A',
       product_name: 'Service Payment',
       product_category: 'Payment',
@@ -60,7 +65,6 @@ const validate = async (data) => {
       method: 'GET',
       url: `${config.ssl.sslValidationUrl}?val_id=${data.val_id}&store_id=${config.ssl.storeId}&store_passwd=${config.ssl.storePass}&format=json`,
     });
-    console.log(response);
     return response.data;
   } catch (err) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Payment error');

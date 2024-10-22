@@ -5,11 +5,11 @@
   "main": "src/server.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "dev": "NODE_ENV=development nodemon src/server.js",
+    "start": "NODE_ENV=development node src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "<mikatsyed@gmail.com><mikatsyed>",
+  "author": "",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^2.0.20",

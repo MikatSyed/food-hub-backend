@@ -3,6 +3,7 @@ import httpStatus from 'http-status'
 import config from '../../../config/index.js';
 import { jwtHelpers } from '../../../helpers/jwtHelpers.js';
 import { User } from './auth.model.js';
+import { Recipe } from '../recipe/recipe.model.js';
 
 
 
@@ -96,8 +97,35 @@ const getLoggedUser = async (id)=> {
   return result
 }
 
+const getAllUser = async () => {
+  const result = await User.find()
+  return result;
+};
+
+const getStatistics = async () => {
+  // Get the total number of users
+  const totalUsers = await User.countDocuments();
+
+  // Get the total number of recipes
+  const totalRecipes = await Recipe.countDocuments();
+
+  return {
+    totalUsers,
+    totalRecipes,
+  };
+};
+const deleteUser = async (id) => {
+  const result = await User.findByIdAndDelete({ _id: id })
+  return result;
+};
+
+
+
 export const authService = {
   socialLogin,
   // refreshToken,
-  getLoggedUser
+  getLoggedUser,
+  getAllUser,
+  getStatistics,
+  deleteUser
 }

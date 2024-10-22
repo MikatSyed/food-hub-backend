@@ -5,25 +5,27 @@ import auth from '../../middlewares/auth.js'
 
 const router = express.Router()
 
+router.patch(
+  '/update/:id',
+  // validateRequest(RecipeValidation.updateRecipeZodSchema),
+  auth(),
+  RecipeController.updateRecipe
+)
+
 router.post(
   '/',
   // validateRequest(RecipeValidation.createRecipeZodSchema),
   auth(),
   RecipeController.createRecipe
 )
-router.patch(
-  '/:id',
-  // validateRequest(RecipeValidation.updateRecipeZodSchema),
-  auth(),
-  RecipeController.updateRecipe
-)
+
 router.get(
   '/',
   RecipeController.getAllRecipes
 )
 router.get(
   '/:id',
-  auth(),
+  // auth(),
   RecipeController.getSingleRecipe
 )
 router.get(
@@ -35,6 +37,11 @@ router.post(
   '/:recipeId/purchase',
   auth(),
   RecipeController.purchaseRecipe
+)
+router.post(
+  '/react/:recipeId/liked',
+  auth(),
+  RecipeController.reactRecipe
 )
 router.delete('/:id', auth(), RecipeController.deleteRecipe)
 

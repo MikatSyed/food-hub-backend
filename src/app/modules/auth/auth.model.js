@@ -1,9 +1,7 @@
-import { Schema, model } from 'mongoose'
-
+import { Schema, model } from 'mongoose';
 
 const UserSchema = new Schema(
   {
-   
     displayName: {
       type: String,
       required: true,
@@ -16,11 +14,15 @@ const UserSchema = new Schema(
     photoURL: {
       type: String,
       required: true,
-     
     },
     coins: {
       type: Number,
       default: 50,
+    },
+    role: {
+      type: String,
+      enum: ['User', 'Admin'],  
+      default: 'User',          
     },
   },
   {
@@ -28,6 +30,4 @@ const UserSchema = new Schema(
   }
 );
 
-
-
-export const User = model('User', UserSchema)
+export const User = model('User', UserSchema);
